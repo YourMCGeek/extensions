@@ -1,5 +1,9 @@
 # Phosphor Changelog
 
+## [Windows] - {PR_MERGE_DATE}
+
+Release for Windows
+
 ## [Enhancements] - 2024-06-03
 
 Added fuzzy search to search icons

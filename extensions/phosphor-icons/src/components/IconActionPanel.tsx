@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Clipboard, showHUD } from "@raycast/api";
 import { getIconUrl } from "../utils/helpers";
-import fetch from "node-fetch";
-import { FC } from "react";
+import { showFailureToast } from "@raycast/utils";
 
 type Props = {
   name: string;
@@ -11,7 +10,7 @@ type Props = {
   weightClassName: string;
 };
 
-const IconActionPanel: FC<Props> = ({ name, weight, pascalName, weightText, weightClassName }) => {
+const IconActionPanel = ({ name, weight, pascalName, weightText, weightClassName }: Props) => {
   return (
     <ActionPanel title="Copy to Clipboard">
       <Action.CopyToClipboard
@@ -29,9 +28,19 @@ const IconActionPanel: FC<Props> = ({ name, weight, pascalName, weightText, weig
           tintColor: { light: "black", dark: "white" },
         }}
         onAction={async () => {
-          const fileContent = await fetch(getIconUrl(name, weight)).then((res) => res.text());
-          await Clipboard.copy(fileContent);
-          await showHUD("Copied to Clipboard");
+          try {
+            const response = await fetch(getIconUrl(name, weight));
+            if (!response.ok) {
+              throw new Error(`Failed to fetch icon: ${response.statusText}`);
+            }
+            const fileContent = await response.text();
+            await Clipboard.copy(fileContent);
+            await showHUD("Copied to Clipboard");
+          } catch (error) {
+            await showFailureToast(error instanceof Error ? error.message : "Unknown error occurred", {
+              title: "Failed to copy SVG",
+            });
+          }
         }}
       />
       <Action.CopyToClipboard
